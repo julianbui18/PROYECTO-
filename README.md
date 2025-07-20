@@ -150,9 +150,9 @@ def revisar_si_gano(tablero_visible, tablero_oculto):
 # Función principal del juego
 def jugar():
     print("Bienvenido a Buscaminas")
-    print("1. Fácil (5x5, 3 minas)")
-    print("2. Medio (8x8, 10 minas)")
-    print("3. Difícil (10x10, 20 minas)")
+    print("1. Facil (5x5, 3 minas)")
+    print("2. Pro (8x8, 10 minas)")
+    print("3. Pro max (10x10, 20 minas)")
 
     # Selección de nivel por parte del usuario
     nivel = input("Selecciona dificultad (1, 2, 3): ")
