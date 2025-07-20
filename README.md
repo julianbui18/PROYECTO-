@@ -246,80 +246,62 @@ jugar_buscamina()
 ```
 2....
 ```
-import random  # Importamos la librería random para colocar minas en posiciones aleatorias
+import random
+import time
 
-# Función para crear un tablero vacío con espacios en blanco
 def crear_tablero(filas, columnas):
     tablero = []
-    for numero_fila in range(filas):
-        fila_actual = []
-        for numero_columna in range(columnas):
-            fila_actual.append(" ")  # Cada casilla inicia vacía
-        tablero.append(fila_actual)
+    for _ in range(filas):
+        tablero.append([" " for _ in range(columnas)])
     return tablero
 
-# Función para colocar minas aleatoriamente en el tablero
 def colocar_minas(tablero, cantidad_minas):
     minas_colocadas = 0
-    total_filas = len(tablero)
-    total_columnas = len(tablero[0])
     while minas_colocadas < cantidad_minas:
-        fila_aleatoria = random.randint(0, total_filas - 1)  # Escoge una fila aleatoria
-        columna_aleatoria = random.randint(0, total_columnas - 1)  # Escoge una columna aleatoria
-        if tablero[fila_aleatoria][columna_aleatoria] != "X":  # Verifica que no haya una mina ya
-            tablero[fila_aleatoria][columna_aleatoria] = "X"  # Coloca la mina
-            minas_colocadas += 1  # Aumenta el contador de minas
+        fila = random.randint(0, len(tablero) - 1)
+        columna = random.randint(0, len(tablero[0]) - 1)
+        if tablero[fila][columna] != "X":
+            tablero[fila][columna] = "X"
+            minas_colocadas += 1
 
-# Función que cuenta cuántas minas hay alrededor de una casilla específica
 def contar_minas_adyacentes(tablero, fila, columna):
-    total_filas = len(tablero)
-    total_columnas = len(tablero[0])
-    cantidad_minas = 0
-    for fila_vecina in range(fila - 1, fila + 2):
-        for columna_vecina in range(columna - 1, columna + 2):
-            # Verifica que esté dentro del tablero
-            if 0 <= fila_vecina < total_filas and 0 <= columna_vecina < total_columnas:
-                if tablero[fila_vecina][columna_vecina] == "X":
-                    cantidad_minas += 1
-    return cantidad_minas
+    cantidad = 0
+    for f in range(fila - 1, fila + 2):
+        for c in range(columna - 1, columna + 2):
+            if 0 <= f < len(tablero) and 0 <= c < len(tablero[0]):
+                if tablero[f][c] == "X":
+                    cantidad += 1
+    return cantidad
 
-# Función que descubre una casilla y sus vecinas si no hay minas alrededor
 def descubrir_casilla(tablero_visible, tablero_minas, fila, columna):
     if tablero_visible[fila][columna] == "F":
-        return  # Si hay una bandera, no hace nada
+        return
     if tablero_minas[fila][columna] == "X":
-        tablero_visible[fila][columna] = "X"  # Si hay mina, se muestra
+        tablero_visible[fila][columna] = "X"
         return
     cantidad = contar_minas_adyacentes(tablero_minas, fila, columna)
     if cantidad > 0:
-        tablero_visible[fila][columna] = str(cantidad)  # Muestra número de minas cercanas
+        tablero_visible[fila][columna] = str(cantidad)
     else:
-        tablero_visible[fila][columna] = "-"  # No hay minas cerca
-        # Descubre todas las casillas vecinas recursivamente
-        for fila_vecina in range(fila - 1, fila + 2):
-            for columna_vecina in range(columna - 1, columna + 2):
-                if 0 <= fila_vecina < len(tablero_visible) and 0 <= columna_vecina < len(tablero_visible[0]):
-                    if tablero_visible[fila_vecina][columna_vecina] == " ":
-                        descubrir_casilla(tablero_visible, tablero_minas, fila_vecina, columna_vecina)
+        tablero_visible[fila][columna] = "-"
+        for f in range(fila - 1, fila + 2):
+            for c in range(columna - 1, columna + 2):
+                if 0 <= f < len(tablero_visible) and 0 <= c < len(tablero_visible[0]):
+                    if tablero_visible[f][c] == " ":
+                        descubrir_casilla(tablero_visible, tablero_minas, f, c)
 
-# Función que imprime el tablero en la consola
 def mostrar_tablero(tablero):
-    # Imprime encabezado con los números de columna
-    print("   " + " ".join(str(numero) for numero in range(len(tablero[0]))))
-    for indice_fila, fila in enumerate(tablero):
-        # Imprime el número de la fila y sus casillas
-        print(str(indice_fila).rjust(2) + " " + " ".join(fila))
+    print("   " + " ".join(str(i) for i in range(len(tablero[0]))))
+    for i, fila in enumerate(tablero):
+        print(str(i).rjust(2) + " " + " ".join(fila))
 
-# Función para verificar si el jugador ha ganado
 def revisar_victoria(tablero_visible, tablero_minas):
-    for fila in range(len(tablero_visible)):
-        for columna in range(len(tablero_visible[0])):
-            # Si hay una casilla no descubierta que no tiene mina, aún no gana
-            if tablero_visible[fila][columna] == " " and tablero_minas[fila][columna] != "X":
+    for f in range(len(tablero_visible)):
+        for c in range(len(tablero_visible[0])):
+            if tablero_visible[f][c] == " " and tablero_minas[f][c] != "X":
                 return False
-    return True  # Si no hay más casillas por descubrir, gana
+    return True
 
-# Función principal del juego
 def jugar():
     print("Bienvenido al Buscaminas")
     print("1. Fácil (5x5 con 3 minas)")
@@ -328,7 +310,6 @@ def jugar():
 
     nivel = input("Selecciona un nivel (1/2/3): ")
     
-    # Establece el tamaño del tablero y la cantidad de minas según el nivel
     if nivel == "1":
         filas, columnas, minas = 5, 5, 3
     elif nivel == "2":
@@ -339,47 +320,49 @@ def jugar():
         print("Nivel inválido. Se usará el fácil.")
         filas, columnas, minas = 5, 5, 3
 
-    # Crea los tableros: uno visible para el jugador y otro oculto con minas
     tablero_visible = crear_tablero(filas, columnas)
     tablero_minas = crear_tablero(filas, columnas)
-    colocar_minas(tablero_minas, minas)  # Coloca minas en el tablero oculto
+    colocar_minas(tablero_minas, minas)
 
     juego_activo = True
+    tiempo_inicio = time.time()
 
-    # Bucle principal del juego
     while juego_activo:
-        mostrar_tablero(tablero_visible)  # Muestra el tablero actual
+        mostrar_tablero(tablero_visible)
         print("Para jugar escribe: fila columna (ejemplo: 2 3)")
         print("Para poner/quitar bandera escribe: b fila columna (ejemplo: b 2 3)")
-        entrada = input("Tu jugada: ").split()  # Lee la entrada del usuario
+        entrada = input("Tu jugada: ").split()
 
-        # Si el jugador pone o quita una bandera
         if entrada[0] == "b" and len(entrada) == 3:
             fila = int(entrada[1])
             columna = int(entrada[2])
             if tablero_visible[fila][columna] == " ":
-                tablero_visible[fila][columna] = "F"  # Coloca bandera
+                tablero_visible[fila][columna] = "F"
             elif tablero_visible[fila][columna] == "F":
-                tablero_visible[fila][columna] = " "  # Quita bandera
+                tablero_visible[fila][columna] = " "
 
-        # Si el jugador elige una casilla para descubrir
         elif len(entrada) == 2:
             fila = int(entrada[0])
             columna = int(entrada[1])
             if tablero_visible[fila][columna] == "F":
-                continue  # Ignora si hay una bandera
+                continue
             if tablero_minas[fila][columna] == "X":
                 tablero_visible[fila][columna] = "X"
                 mostrar_tablero(tablero_visible)
-                print("¡Perdiste!")  # Muestra mensaje de derrota
-                juego_activo = False
+                tiempo_total = round(time.time() - tiempo_inicio, 2)
+                print("¡Perdiste!")
+                print(f"Tiempo jugado: {tiempo_total} segundos.")
+                break  # Sale del bucle y continúa el código (sin cerrar)
             else:
                 descubrir_casilla(tablero_visible, tablero_minas, fila, columna)
                 if revisar_victoria(tablero_visible, tablero_minas):
                     mostrar_tablero(tablero_visible)
-                    print("¡Ganaste!")  # Muestra mensaje de victoria
-                    juego_activo = False
+                    tiempo_total = round(time.time() - tiempo_inicio, 2)
+                    print("¡Ganaste!")
+                    print(f"Tiempo jugado: {tiempo_total} segundos.")
+                    break  # También termina el juego, pero muestra el resultado
 
-# Inicia el juego
+# Ejecutar el juego
 jugar()
+
 ```
