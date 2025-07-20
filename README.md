@@ -175,7 +175,6 @@ def jugar_buscamina():
         minas_total = 20
     else:
         print("Opción inválida.")
-        input("Presiona Enter para salir...")
         return
 
     tablero = crear_tablero(filas, columnas)
@@ -195,7 +194,6 @@ def jugar_buscamina():
         print("O: b fila columna (ej. b 2 3) para bandera")
 
         entrada = input(">> ").split()
-
         cantidad_elementos = len(entrada)
 
         if cantidad_elementos == 3 and entrada[0].lower() == 'b':
@@ -220,7 +218,6 @@ def jugar_buscamina():
 
             if esta_en_banderas:
                 print("No puedes descubrir una casilla con bandera.")
-                input("Presiona Enter para continuar...")
             else:
                 esta_en_minas = False
                 for par in minas:
@@ -232,7 +229,7 @@ def jugar_buscamina():
                     os.system('cls' if os.name == 'nt' else 'clear')
                     mostrar_tablero(tablero)
                     print("💥 ¡Perdiste!")
-                    juego_terminado = True
+                    return  # termina inmediatamente
                 else:
                     descubrir(tablero, fila, columna, minas, descubiertas, banderas, filas, columnas)
                     si_gano = victoria(filas, columnas, minas, descubiertas)
@@ -240,11 +237,10 @@ def jugar_buscamina():
                         os.system('cls' if os.name == 'nt' else 'clear')
                         mostrar_tablero(tablero)
                         print("🎉 ¡Ganaste!")
-                        juego_terminado = True
+                        return
 
-    tiempo_final = int(time.time() - tiempo_inicio)
-    print("⏱️ Tiempo total:", tiempo_final, "segundos")
-    input("Presiona Enter para salir...")
+    tiempo_total = int(time.time() - tiempo_inicio)
+    print("⏱️ Tiempo total:", tiempo_total, "segundos")
 
 jugar_buscamina()
 ```
