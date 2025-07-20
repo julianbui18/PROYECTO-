@@ -90,143 +90,161 @@ import random
 import os
 import time
 
-# Crea el tablero vacío y coloca minas aleatoriamente
-def crear_tablero(numero_filas, numero_columnas, cantidad_minas):
+def crear_tablero(filas, columnas):
     tablero = []
-    for numero_fila in range(numero_filas):
-        fila_del_tablero = []
-        for numero_columna in range(numero_columnas):
-            fila_del_tablero.append(' ')
-        tablero.append(fila_del_tablero)
+    for fila_actual in range(filas):
+        fila_tablero = []
+        for columna_actual in range(columnas):
+            fila_tablero.append(' ')
+        tablero.append(fila_tablero)
+    return tablero
 
-    minas_colocadas = set()
-    while len(minas_colocadas) < cantidad_minas:
-        fila_mina = random.randint(0, numero_filas - 1)
-        columna_mina = random.randint(0, numero_columnas - 1)
-        minas_colocadas.add((fila_mina, columna_mina))
+def colocar_minas(filas, columnas, cantidad_minas):
+    minas = set()
+    while len(minas) < cantidad_minas:
+        fila_azar = random.randint(0, filas - 1)
+        columna_azar = random.randint(0, columnas - 1)
+        minas.add((fila_azar, columna_azar))
+    return minas
 
-    return tablero, minas_colocadas
-
-# Muestra el tablero en consola
 def mostrar_tablero(tablero):
     print("\n   ", end="")
     for numero_columna in range(len(tablero[0])):
-        print(str(numero_columna) + " ", end="")
+        print(f"{numero_columna} ", end="")
     print()
     for numero_fila in range(len(tablero)):
         print(f"{numero_fila:2} ", end="")
-        for casilla in tablero[numero_fila]:
-            print(casilla + " ", end="")
+        for celda in tablero[numero_fila]:
+            print(f"{celda} ", end="")
         print()
     print()
 
-# Cuenta las minas que hay cerca de una celda
-def contar_minas_cercanas(fila, columna, minas, total_filas, total_columnas):
-    cantidad_minas = 0
-    for fila_actual in range(fila - 1, fila + 2):
-        for columna_actual in range(columna - 1, columna + 2):
-            if fila_actual >= 0 and fila_actual < total_filas and columna_actual >= 0 and columna_actual < total_columnas:
-                if (fila_actual, columna_actual) != (fila, columna):
-                    if (fila_actual, columna_actual) in minas:
-                        cantidad_minas = cantidad_minas + 1
-    return cantidad_minas
+def contar_minas_cerca(fila, columna, minas, filas, columnas):
+    contador = 0
+    for f in range(fila - 1, fila + 2):
+        for c in range(columna - 1, columna + 2):
+            if 0 <= f < filas and 0 <= c < columnas:
+                if (f, c) in minas and (f, c) != (fila, columna):
+                    contador += 1
+    return contador
 
-# Descubre la celda y sus vecinas si no hay minas cerca
-def descubrir_celda(tablero, fila, columna, minas, descubiertas, total_filas, total_columnas):
+def descubrir(tablero, fila, columna, minas, descubiertas, banderas, filas, columnas):
     if (fila, columna) in descubiertas:
         return
-    if fila < 0 or fila >= total_filas or columna < 0 or columna >= total_columnas:
+    if (fila, columna) in banderas:
         return
 
     descubiertas.add((fila, columna))
-    minas_adyacentes = contar_minas_cercanas(fila, columna, minas, total_filas, total_columnas)
+    minas_cercanas = contar_minas_cerca(fila, columna, minas, filas, columnas)
 
-    if minas_adyacentes > 0:
-        tablero[fila][columna] = str(minas_adyacentes)
+    if minas_cercanas > 0:
+        tablero[fila][columna] = str(minas_cercanas)
     else:
         tablero[fila][columna] = '.'
-        for fila_vecina in range(fila - 1, fila + 2):
-            for columna_vecina in range(columna - 1, columna + 2):
-                if fila_vecina >= 0 and fila_vecina < total_filas and columna_vecina >= 0 and columna_vecina < total_columnas:
-                    if (fila_vecina, columna_vecina) != (fila, columna):
-                        descubrir_celda(tablero, fila_vecina, columna_vecina, minas, descubiertas, total_filas, total_columnas)
+        for f in range(fila - 1, fila + 2):
+            for c in range(columna - 1, columna + 2):
+                if 0 <= f < filas and 0 <= c < columnas:
+                    if (f, c) != (fila, columna):
+                        descubrir(tablero, f, c, minas, descubiertas, banderas, filas, columnas)
 
-# Verifica si se ha ganado el juego
-def revisar_victoria(total_filas, total_columnas, cantidad_minas, descubiertas):
-    total_casillas = total_filas * total_columnas
-    return len(descubiertas) == total_casillas - cantidad_minas
+def victoria(filas, columnas, minas, descubiertas):
+    total_casillas = filas * columnas
+    total_sin_mina = total_casillas - len(minas)
+    return len(descubiertas) == total_sin_mina
 
-# Lógica principal del juego
 def jugar_buscamina():
-    print("Bienvenido al Buscaminas 🎮")
-    print("Elige un nivel de dificultad:")
+    print("🎮 Bienvenido al Buscaminas")
+    print("Elige dificultad:")
     print("1. Fácil (5x5 con 5 minas)")
     print("2. Medio (8x8 con 10 minas)")
     print("3. Difícil (10x10 con 20 minas)")
 
-    nivel_seleccionado = input("Escribe 1, 2 o 3: ")
+    opcion = input("Selecciona 1, 2 o 3: ")
 
-    if nivel_seleccionado == '1':
-        numero_filas = 5
-        numero_columnas = 5
-        cantidad_minas = 5
-    elif nivel_seleccionado == '2':
-        numero_filas = 8
-        numero_columnas = 8
-        cantidad_minas = 10
-    elif nivel_seleccionado == '3':
-        numero_filas = 10
-        numero_columnas = 10
-        cantidad_minas = 20
+    if opcion == '1':
+        filas = 5
+        columnas = 5
+        minas_total = 5
+    elif opcion == '2':
+        filas = 8
+        columnas = 8
+        minas_total = 10
+    elif opcion == '3':
+        filas = 10
+        columnas = 10
+        minas_total = 20
     else:
-        print("Nivel inválido.")
+        print("Opción inválida.")
+        input("Presiona Enter para salir...")
         return
 
-    tablero_juego, minas_colocadas = crear_tablero(numero_filas, numero_columnas, cantidad_minas)
-    casillas_descubiertas = set()
-    juego_terminado = False
-    turno = 0
+    tablero = crear_tablero(filas, columnas)
+    minas = colocar_minas(filas, columnas, minas_total)
+    descubiertas = set()
+    banderas = set()
     tiempo_inicio = time.time()
+    juego_terminado = False
 
-    while turno < numero_filas * numero_columnas and juego_terminado == False:
+    for intento in range(10000):
+        if juego_terminado:
+            break
+
         os.system('cls' if os.name == 'nt' else 'clear')
-        mostrar_tablero(tablero_juego)
-        print("Escribe la fila y la columna separadas por espacio (ejemplo: 2 3):")
-        entrada_usuario = input(">> ").split()
+        mostrar_tablero(tablero)
+        print("Escribe: fila columna (ej. 2 3) para descubrir")
+        print("O: b fila columna (ej. b 2 3) para bandera")
 
-        if len(entrada_usuario) == 2:
-            texto_fila = entrada_usuario[0]
-            texto_columna = entrada_usuario[1]
+        entrada = input(">> ").split()
 
-            if texto_fila.isdigit() and texto_columna.isdigit():
-                fila_elegida = int(texto_fila)
-                columna_elegida = int(texto_columna)
+        cantidad_elementos = len(entrada)
 
-                if fila_elegida >= 0 and fila_elegida < numero_filas and columna_elegida >= 0 and columna_elegida < numero_columnas:
-                    if (fila_elegida, columna_elegida) in minas_colocadas:
-                        os.system('cls' if os.name == 'nt' else 'clear')
-                        mostrar_tablero(tablero_juego)
-                        print("💣 Perdiste. Pisaste una mina.")
-                        juego_terminado = True
-                    else:
-                        descubrir_celda(tablero_juego, fila_elegida, columna_elegida, minas_colocadas, casillas_descubiertas, numero_filas, numero_columnas)
+        if cantidad_elementos == 3 and entrada[0].lower() == 'b':
+            fila_b = int(entrada[1])
+            columna_b = int(entrada[2])
 
-                        if revisar_victoria(numero_filas, numero_columnas, cantidad_minas, casillas_descubiertas):
-                            os.system('cls' if os.name == 'nt' else 'clear')
-                            mostrar_tablero(tablero_juego)
-                            print("🎉 ¡Felicidades! Descubriste todas las casillas seguras.")
-                            juego_terminado = True
-                        else:
-                            turno = turno + 1
-                else:
-                    print("Coordenadas fuera del tablero.")
+            if (fila_b, columna_b) in banderas:
+                banderas.remove((fila_b, columna_b))
+                tablero[fila_b][columna_b] = ' '
             else:
-                print("Debes escribir números.")
-        else:
-            print("Debes ingresar exactamente dos valores.")
+                banderas.add((fila_b, columna_b))
+                tablero[fila_b][columna_b] = '🚩'
 
-    duracion_total = int(time.time() - tiempo_inicio)
-    print("⏱️ Tiempo total:", duracion_total, "segundos")
+        if cantidad_elementos == 2:
+            fila = int(entrada[0])
+            columna = int(entrada[1])
 
-# Ejecutar el juego
+            esta_en_banderas = False
+            for par in banderas:
+                if par == (fila, columna):
+                    esta_en_banderas = True
+
+            if esta_en_banderas:
+                print("No puedes descubrir una casilla con bandera.")
+                input("Presiona Enter para continuar...")
+            else:
+                esta_en_minas = False
+                for par in minas:
+                    if par == (fila, columna):
+                        esta_en_minas = True
+
+                if esta_en_minas:
+                    tablero[fila][columna] = '💣'
+                    os.system('cls' if os.name == 'nt' else 'clear')
+                    mostrar_tablero(tablero)
+                    print("💥 ¡Perdiste!")
+                    juego_terminado = True
+                else:
+                    descubrir(tablero, fila, columna, minas, descubiertas, banderas, filas, columnas)
+                    si_gano = victoria(filas, columnas, minas, descubiertas)
+                    if si_gano:
+                        os.system('cls' if os.name == 'nt' else 'clear')
+                        mostrar_tablero(tablero)
+                        print("🎉 ¡Ganaste!")
+                        juego_terminado = True
+
+    tiempo_final = int(time.time() - tiempo_inicio)
+    print("⏱️ Tiempo total:", tiempo_final, "segundos")
+    input("Presiona Enter para salir...")
+
 jugar_buscamina()
+```
