@@ -43,7 +43,7 @@ flowchart TD
     H --> I[Iniciar el ciclo principal del juego]
 
     I --> J[Mostrar el tablero visible con coordenadas]
-    J --> K[Pedir jugada al jugador (descubrir o poner bandera)]
+    J --> K[Pedir jugada al jugador - descubrir o poner bandera]
 
     K --> L{¿Es una entrada válida?}
     L -- No --> J
