@@ -2,21 +2,16 @@
 ## Grupo: Hormigon y Algoritmos (H&A)
 ### Integrantes: Juan Andres Gonzalez Triana, Julian Esteban Buitrago Cruz, Sergio Olivares Martin
 
-## ¿Que es un Buscaminas? 🎮
+## ¿Que es un Buscaminas? 
 El Buscaminas es un juego en el que hay un tablero lleno de cuadros tapados. Algunas de esas casillas tienen minas (como bombas) escondidas y las demás están vacías o tienen un número. La idea es destapar todos los cuadritos que no tienen mina sin que explote ninguna.
-### Jugabilidad
-Cuando empieza el juego, dar clic en cualquier parte del tablero:
-* Si está vacía, se destapa un buen pedazo de tablero.
-* Si tiene un número, ese número me dice cuántas minas hay alrededor de esa casilla, contando las 8 que la rodean.
-* Puede haber una mina y perder la partida.
-* Se gana si se logran destapar todas las casillas que no tienen minas.
 
+<img width="161" height="204" alt="image" src="https://github.com/user-attachments/assets/55c9c59d-7648-4ffb-9b2e-358ffa4723f3" />
 
 ## Objetivo 📌
 
 El siguiente reporte contiene informacion sobre el desarrollo desde cero de un programa en python que permite la jugabilidad de un buscaminas desde la consola.
 
-## Condiciones planteadas
+## Condiciones planteadas 📚
 
 El buscaminas debe cumplir con las siguientes condiciones:
 
@@ -26,6 +21,19 @@ El buscaminas debe cumplir con las siguientes condiciones:
 - 3 niveles de dificultad: tamaño de la matriz, cantidad de minas.
 - Dibujo de la matriz en consola.
 - Definidido por el usuario: Forma de interactuar; feclas, por coordenadas.
+
+## Jugabilidad 🎮
+Cuando empieza el juego, dar clic en cualquier parte del tablero:
+1. En primera instacion se pregunta al jugador que dificultad quiere, dificultad que se basa en la cantidad de celdas y minas que tiene cada "nivel", entre las opciones econtramos 3 dificultades:
+   * Juego de 5 X 5, contiene 3 minas.
+   * Juego de 8 X 8, contiene 10 minas.
+   * Juego de 10 X 10, contiene 10 minas.
+2. Para elegir la opcion anterior, se dispone a preguntas el numero de la opcion, donde nivel facil es 1, nivel pro es 2 y nivel 3 es pro max.
+3. Inicia el juego, segun la opcion que eligio el jugardor, se muestra el tablero correspondiente, y se da la intruccion de como meter las coordenadas de fila y columna, para iniciar la jugabilidad, en cado caso de querer poner una bandera para denotar una posible mina, se da tambien la instruccion.
+4. El juego ocntinua hasta que sucedan dos opciones:
+   * El jugador gane, y descubra todas las celdas correctamente.
+   * El jugador detone una mina y pierda la partida
+5. Al finalizar la partida se mostrara el tiempo que tardo el jugador en hacer su partida.
 
 ## Diagrama de flujo
 Para llegar a la solucion del problema definimos un diagrama de flujo que nos permite visualizar el problema desde otra perspectiva. El diagrama permite que veamos con mas claridad el problema, para posteriormente empezar a escribir el codigo.
@@ -73,9 +81,7 @@ flowchart TD
 
     V -- No --> I
 ```
- ## Interfaz
- Como el juego va a ser puesto en marchar en consola no se puede usar gráficos como imágenes o íconos reales, pero se puede simular una interfaz visual. Segun investigamos se puede usar  ```colorama``` que es una librería de Python que te permite darle color a los textos en la consola
-
+ 
 ## Solucion preliminar
 
 Se definiero una serie de pasos "PRELIMINARES" a seguir para hacer la construccion del problema.
