@@ -82,22 +82,133 @@ flowchart TD
     V -- No --> I
 ```
  
-## Solucion preliminar
+## CODIGO 🖥️
+Se hizo una separacion del codigo para dar una explicacion adecuada de cada parte, siendo de la siguiente manera:
 
-Se definiero una serie de pasos "PRELIMINARES" a seguir para hacer la construccion del problema.
+1. **IMPORTAR LAS LIBRERIAS**
 
-### Paso 1
-* **Crear el tablero:** Se plantea crear dos tableros uno visible para el jugador, donde tendria que seleccionar las "celdas" y otro no visible donde apareceran las minas. Para este paso se planea usar principalmente variables y rangos para definir el numero columnas y filas.
-### Paso 2
-* **Colocar las minas de manera aleatoria:** Se tiene pensado usar condicionales para verificar si la celda ya tiene una mina o no.
-### Paso 3
-* **Diseño tablero:** Creemos que esto se puede lograr a traves de una funcion, ademas el metodo de como se podra jugar e interactuar con el tablero es a partir de coordenadas, donde cada fila y columna estara demarcada como un numero.
-### Paso 4
-* **Minas existentes alrededor de una casilla:** Usando condicionales para evitar salirse del tablero (bordes) y para detectar si hay una mina en esa casilla vecina.
-### Paso 5
-* **Logica del juego:** Aquí se desarrolla la parte central del juego, permitir al jugador hacer jugadas, verificar si pierde o sigue, y actualizar el tablero visible con el número de minas alrededor. Se tiene previsto usar condicionales (if/else) para saber si se pisa una mina o no e "Input" para pedir al jugador que ingrese fila y columna.
-### Paso 6
-* **Final del juego:** Cuando el jugador pierde o gana, se muestra el tablero real completo con todas las minas descubiertas. Ademas mensajes de victoria o derrota claros y sencillos y posiblemente un print final que diga “Fin del juego”. Para poder pasar al siguiente "nivel".
+```python
+import random  # Para colocar minas aleatoriamente
+import time    # Para medir cuánto tarda el jugador en terminar
+```
+
+2. **FUNCIONES DE CONFIGURACION DEL TABLERO**
+
+**Crear tablero**
+
+```python
+def crear_tablero(numero_filas, numero_columnas):
+    return [["■" for _ in range(numero_columnas)] for _ in range(numero_filas)]
+```
+
+Esta función genera un tablero como una lista de listas (una matriz), con el valor que se le indique en cada casilla.
+Se usa para crear tanto:
+* El tablero oculto, que tiene las minas.
+* El tablero visible, que es el que el jugador ve en pantalla.
+* Devuelve una matriz de ```■```, que representan las celdas ocultas del tablero.
+
+**Colocar minas**
+
+```python
+def colocar_minas(tablero, cantidad_minas):
+    minas_colocadas = 0
+    while minas_colocadas < cantidad_minas:
+        fila = random.randint(0, len(tablero) - 1)
+        columna = random.randint(0, len(tablero[0]) - 1)
+        if tablero[fila][columna] != "*":
+            tablero[fila][columna] = "*"
+            minas_colocadas += 1
+```
+
+Recibe el tablero oculto y coloca minas en posiciones aleatorias. Se asegura de que no se repitan posiciones y para distribuir las minas en el tablero al iniciar el juego.
+
+3. **LOGICA DEL JUEGO**
+
+**Contar minas cercanas**
+```python
+def contar_minas_de_alrededor(tablero, fila, columna):
+    minas = 0
+    for fila_actual in range(fila - 1, fila + 2):
+        for columna_actual in range(columna - 1, columna + 2):
+            if 0 <= fila_actual < len(tablero) and 0 <= columna_actual < len(tablero[0]):
+                if tablero[fila_actual][columna_actual] == "*":
+                    minas += 1
+    return minas
+```
+Cuando el jugador selecciona una casilla, se necesita saber cuántas minas hay en las casillas vecinas. Esta función revisa las 8 casillas alrededor y cuenta cuántas minas hay.
+
+**Descubrir celdas**
+
+```python
+def descubrir(tablero_visible, tablero_oculto, fila, columna):
+    if tablero_visible[fila][columna] == "B":
+        return
+    if tablero_oculto[fila][columna] == "*":
+        tablero_visible[fila][columna] = "*"
+        return
+    minas_cerca = contar_minas_de_alrededor(tablero_oculto, fila, columna)
+    if minas_cerca > 0:
+        tablero_visible[fila][columna] = str(minas_cerca)
+    else:
+        tablero_visible[fila][columna] = "."
+        for fila_vecina in range(fila - 1, fila + 2):
+            for columna_vecina in range(columna - 1, columna + 2):
+                if 0 <= fila_vecina < len(tablero_visible) and 0 <= columna_vecina < len(tablero_visible[0]):
+                    if tablero_visible[fila_vecina][columna_vecina] == "■":
+                        descubrir(tablero_visible, tablero_oculto, fila_vecina, columna_vecina)
+```
+Cuando el jugador descubre una casilla sin minas cercanas, se hace una "revelación en cascada" de casillas vacías alrededor. Esta función lo hace automáticamente y va descubriendo mientras encuentre casillas seguras
+
+4. **MOSTRAR EL TABLERO**
+
+```python
+def mostrar(tablero):
+    print("   " + " ".join(str(numero) for numero in range(len(tablero[0]))))
+    for indice_fila, fila in enumerate(tablero):
+        print(str(indice_fila).rjust(2), " ".join(fila))
+```
+Muestra el tablero visible con coordenadas para que el jugador sepa qué casilla elegir. Es fundamental para la interacción.
+
+5. **REVISAR SI EL JUGADOR GANO**
+
+```python
+def revisar_si_gano(tablero_visible, tablero_oculto):
+    for fila in range(len(tablero_visible)):
+        for columna in range(len(tablero_visible[0])):
+            if tablero_visible[fila][columna] == "■" and tablero_oculto[fila][columna] != "*":
+                return False
+    return True
+```
+Después de cada jugada se revisa si todas las casillas que no tienen mina han sido descubiertas.
+Si sí, el jugador gana.
+
+6. **JUEGO PRINCIPAL**
+```python
+def jugar():
+    ...
+```
+
+Selección de dificultad: El jugador escoge entre fácil, medio o difícil. Cambia el tamaño del tablero y el número de minas.
+* Creación de tableros: Se crean dos tableros (visible y oculto).
+* Colocación de minas: Se llaman las funciones necesarias para inicializar todo.
+* Temporizador: Se inicia el tiempo desde que empieza el juego (```start_time = time.time()```).
+* Bucle de juego (```while True```):
+   * Muestra el tablero.
+   * Pide al jugador una jugada (descubrir o poner bandera).
+   * Valida la jugada.
+   * Si pisa una mina: se muestra el mensaje de derrota y se termina el juego.
+   * Si no pisa mina: se descubre la casilla o varias si es vacía.
+   * Se revisa si el jugador ganó.
+* Final del juego:
+  * Muestra el tablero completo con las minas y el tiempo que tomó.
+
+**Llamar a la funcion ```jugar()```**
+```python
+jugar()
+```
+Es lo que inicia todo el programa. Al ejecutar el archivo, se llama a esta función para que empiece el juego.
+
+## CODIGO
 
 ```python
 import random #Utilizamos la importación de "random" con el fin de poder colocar las minas en posiciones aleatorias.
@@ -220,3 +331,5 @@ def jugar(): #Interfaz general del juego
 
 jugar() #Se llama a la función
 ```
+
+**MUCHAS GRACIAS**
