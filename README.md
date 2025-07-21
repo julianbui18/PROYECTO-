@@ -32,38 +32,46 @@ Para llegar a la solucion del problema definimos un diagrama de flujo que nos pe
 
 ```mermaid
 flowchart TD
-    A[Inicio] --> B[Mostrar opciones de dificultad]
+    A[Inicio del juego] --> B[Mostrar opciones de dificultad]
     B --> C{Nivel elegido}
-    C -->|1| D[Tamaño = 5*5, Minas = 3]
-    C -->|2| E[Tamaño = 7*7, Minas = 8]
-    C -->|3| F[Tamaño = 10*10, Minas = 15]
+    C -->|1| D[Filas = 5, Columnas = 5, Minas = 3]
+    C -->|2| E[Filas = 8, Columnas = 8, Minas = 10]
+    C -->|3| F[Filas = 10, Columnas = 10, Minas = 20]
     C -->|Otro| D
-    D & E & F --> G[Crear tablero real y visible]
-    G --> H[Colocar minas aleatoriamente]
-    H --> I[Iniciar bucle del juego]
+    D & E & F --> G[Crear tablero oculto y visible]
+    G --> H[Colocar minas aleatoriamente en el tablero oculto]
+    H --> I[Iniciar el ciclo principal del juego]
 
-    I --> J[Mostrar tablero visible]
-    J --> K[Pedir coordenadas al jugador]
+    I --> J[Mostrar el tablero visible con coordenadas]
+    J --> K[Pedir jugada al jugador (descubrir o poner bandera)]
 
-    K --> L{¿Entrada valida?}
+    K --> L{¿Es una entrada válida?}
     L -- No --> J
-    L -- Si --> M{¿Casilla ya revelada?}
-    M -- Si --> J
-    M -- No --> N{¿Piso mina?}
+    L -- Sí --> M{¿Es una bandera?}
 
-    N -- Si --> O[Mostrar mensaje de pérdida]
-    O --> Z[Fin del juego]
+    M -- Sí --> N[Colocar o quitar bandera]
+    N --> I
+    M -- No --> O{¿Casilla con bandera?}
 
-    N -- No --> P[Contar minas cercanas]
-    P --> Q[Actualizar casilla visible con número]
-    Q --> R[Sumar casilla revelada]
+    O -- Sí --> I
+    O -- No --> P{¿La casilla tiene una mina?}
 
-    R --> S{¿Gano el juego?}
-    S -- Si --> T[Mostrar mensaje de victoria]
-    T --> Z[Fin del juego]
-    S -- No --> I
+    P -- Sí --> Q[Mostrar mina - Fin del juego]
+    Q --> Z[Mensaje: ¡Perdiste!]
+    Z --> END[Fin]
 
-    Z --> U[Mostrar tablero real al final]
+    P -- No --> R[Contar minas alrededor]
+    R --> S{¿Hay minas alrededor?}
+    S -- Sí --> T[Mostrar número de minas]
+    S -- No --> U[Descubrir en cascada casillas vacías]
+
+    T --> V[¿Ha ganado el jugador?]
+    U --> V
+
+    V -- Sí --> W[Mensaje: ¡Ganaste!]
+    W --> END
+
+    V -- No --> I
 ```
  ## Interfaz
  Como el juego va a ser puesto en marchar en consola no se puede usar gráficos como imágenes o íconos reales, pero se puede simular una interfaz visual. Segun investigamos se puede usar  ```colorama``` que es una librería de Python que te permite darle color a los textos en la consola
